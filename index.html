@@ -1,1 +1,427 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <title>5LN Admin - Reset Password</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 70% 20%, rgba(112, 0, 255, 0.26), transparent 30%),
+        radial-gradient(circle at 20% 80%, rgba(0, 132, 255, 0.20), transparent 35%),
+        linear-gradient(135deg, #02030a, #050b24 55%, #170320);
+      color: white;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 520px;
+      padding: 34px;
+      border-radius: 28px;
+      background: rgba(9, 11, 25, 0.82);
+      border: 1px solid rgba(130, 90, 255, 0.35);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.48),
+        0 0 60px rgba(120, 40, 255, 0.12);
+      backdrop-filter: blur(22px);
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 20px;
+      border-radius: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      background: linear-gradient(135deg, #2c9cff, #8b5cff, #f02cff);
+      box-shadow: 0 0 35px rgba(151, 75, 255, 0.45);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 30px;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #9297ac;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #c8cbe0;
+      font-size: 14px;
+    }
+
+    .field {
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.055);
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .field:focus {
+      border-color: #7f5cff;
+      box-shadow: 0 0 0 3px rgba(127, 92, 255, 0.13);
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 16px;
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(90deg, #2196ff, #765cff, #e22cff);
+      box-shadow: 0 12px 32px rgba(102, 76, 255, 0.28);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .success {
+      display: block;
+      background: rgba(24, 170, 100, 0.12);
+      border: 1px solid rgba(34, 210, 125, 0.28);
+      color: #71e7a8;
+    }
+
+    .error {
+      display: block;
+      background: rgba(220, 45, 70, 0.12);
+      border: 1px solid rgba(245, 70, 95, 0.28);
+      color: #ff7f92;
+    }
+
+    .footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 12px;
+      color: #73798e;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="logo">🔐</div>
+
+    <h1>5LN ADMIN</h1>
+
+    <div class="subtitle">
+      إعادة تعيين كلمة مرور المدير
+    </div>
+
+    <label for="password">
+      كلمة المرور الجديدة
+    </label>
+
+    <input
+      id="password"
+      class="field"
+      type="password"
+      placeholder="8 أحرف على الأقل"
+      autocomplete="new-password"
+    />
+
+    <label for="confirmPassword">
+      تأكيد كلمة المرور
+    </label>
+
+    <input
+      id="confirmPassword"
+      class="field"
+      type="password"
+      placeholder="أعد كتابة كلمة المرور"
+      autocomplete="new-password"
+    />
+
+    <button id="resetButton">
+      حفظ كلمة المرور الجديدة
+    </button>
+
+    <div id="message" class="message"></div>
+
+    <div class="footer">
+      SECURE 5LN ADMIN RECOVERY
+    </div>
+
+  </div>
+
+
+  <script>
+    const SUPABASE_URL =
+      "https://dhaalzyhkouxlldkgdhk.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_-EQv3bNZ9EXEgZqe36Fhfw_MmrZdMoH";
+
+
+    function getFragmentParams() {
+
+      const hash =
+        window.location.hash.substring(1);
+
+      const params =
+        new URLSearchParams(hash);
+
+      return {
+        accessToken:
+          params.get("access_token"),
+
+        type:
+          params.get("type"),
+
+        error:
+          params.get("error"),
+
+        errorDescription:
+          params.get("error_description")
+      };
+    }
+
+
+    function showMessage(
+      text,
+      isSuccess
+    ) {
+
+      const box =
+        document.getElementById(
+          "message"
+        );
+
+      box.className =
+        isSuccess
+          ? "message success"
+          : "message error";
+
+      box.textContent =
+        text;
+    }
+
+
+    const fragment =
+      getFragmentParams();
+
+
+    if (fragment.error) {
+
+      showMessage(
+        fragment.errorDescription
+          || "رابط الاستعادة غير صالح.",
+        false
+      );
+    }
+
+
+    if (
+      !fragment.accessToken &&
+      !fragment.error
+    ) {
+
+      showMessage(
+        "لم يتم العثور على رمز الاستعادة. افتح الصفحة من رابط البريد المرسل من 5LN.",
+        false
+      );
+    }
+
+
+    document
+      .getElementById(
+        "resetButton"
+      )
+      .addEventListener(
+        "click",
+        async () => {
+
+          const button =
+            document.getElementById(
+              "resetButton"
+            );
+
+          const password =
+            document
+              .getElementById(
+                "password"
+              )
+              .value;
+
+          const confirmPassword =
+            document
+              .getElementById(
+                "confirmPassword"
+              )
+              .value;
+
+
+          if (!fragment.accessToken) {
+
+            showMessage(
+              "رابط الاستعادة غير صالح أو انتهت صلاحيته.",
+              false
+            );
+
+            return;
+          }
+
+
+          if (
+            password.length < 8
+          ) {
+
+            showMessage(
+              "كلمة المرور يجب أن تكون 8 أحرف على الأقل.",
+              false
+            );
+
+            return;
+          }
+
+
+          if (
+            password !==
+            confirmPassword
+          ) {
+
+            showMessage(
+              "كلمتا المرور غير متطابقتين.",
+              false
+            );
+
+            return;
+          }
+
+
+          try {
+
+            button.disabled =
+              true;
+
+            button.textContent =
+              "جاري الحفظ...";
+
+
+            const response =
+              await fetch(
+                `${SUPABASE_URL}/auth/v1/user`,
+                {
+                  method: "PUT",
+
+                  headers: {
+                    "Content-Type":
+                      "application/json",
+
+                    "apikey":
+                      SUPABASE_PUBLISHABLE_KEY,
+
+                    "Authorization":
+                      `Bearer ${fragment.accessToken}`
+                  },
+
+                  body:
+                    JSON.stringify({
+                      password:
+                        password
+                    })
+                }
+              );
+
+
+            const data =
+              await response.json();
+
+
+            if (!response.ok) {
+
+              throw new Error(
+                data.message
+                || data.msg
+                || data.error_description
+                || "فشل تغيير كلمة المرور."
+              );
+            }
+
+
+            showMessage(
+              "تم تغيير كلمة المرور بنجاح. يمكنك الآن الرجوع إلى تطبيق 5LN Admin وتسجيل الدخول بالكلمة الجديدة.",
+              true
+            );
+
+
+            document
+              .getElementById(
+                "password"
+              )
+              .value = "";
+
+            document
+              .getElementById(
+                "confirmPassword"
+              )
+              .value = "";
+
+
+          } catch (error) {
+
+            showMessage(
+              error.message
+              || "حدث خطأ أثناء تغيير كلمة المرور.",
+              false
+            );
+
+
+          } finally {
+
+            button.disabled =
+              false;
+
+            button.textContent =
+              "حفظ كلمة المرور الجديدة";
+          }
+        }
+      );
+  </script>
+
+</body>
+</html>
